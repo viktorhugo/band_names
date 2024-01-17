@@ -12,9 +12,9 @@ class StatusPage extends StatelessWidget {
 
     final WebSocketService webSocketService = Provider.of<WebSocketService>(context);
 
-    return const Scaffold(
+    return Scaffold(
       body: Center(
-        child: Text('Hola Mundo'),
+        child: Text(' ${webSocketService.serverStatus} '),
       ),
     );
   }
