@@ -1,8 +1,10 @@
 import 'dart:io';
 
 import 'package:band_names/models/band_model.dart';
+import 'package:band_names/providers/web_socket_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 
 class HomeScreen extends StatefulWidget {
@@ -23,11 +25,31 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+
+    final WebSocketService webSocketService = Provider.of<WebSocketService>(context);
+    final WebSocketServerStatus status = webSocketService.serverStatus;
     return Scaffold(
       appBar: AppBar(
         title: const Text('BandNames', style: TextStyle(color: Colors.black87),),
         backgroundColor: Colors.white,
         elevation: 9,
+        actions: [
+          Container(
+            margin: const EdgeInsets.only(right: 10),
+            child: Row(
+              children: [
+                if ( status == WebSocketServerStatus.Connecting || status == WebSocketServerStatus.Reconnecting) 
+                  Icon(Icons.autorenew_sharp, color: Colors.cyan[300], size: 30,),
+                if ( status == WebSocketServerStatus.Online) 
+                  Icon(Icons.check_circle_outline_rounded, color: Colors.green[300], size: 30,),
+                if ( status == WebSocketServerStatus.Offline) 
+                  Icon(Icons.offline_bolt_rounded, color: Colors.red[300], size: 30,),
+              ],
+            ) 
+              
+          )
+          
+        ],
       ),
       body: ListView.builder(
         itemCount: bands.length,

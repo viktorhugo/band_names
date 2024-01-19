@@ -16,6 +16,14 @@ class StatusPage extends StatelessWidget {
       body: Center(
         child: Text(' ${webSocketService.serverStatus} '),
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          // emit message
+          final data  = { 'name': '', 'message': 'Hi from flutter'};
+          webSocketService.handleSendMessage('create-band', data);
+        },
+        child: const Icon(Icons.message_rounded),
+      )
     );
   }
 }
