@@ -1,5 +1,6 @@
 import 'package:band_names/config/router/app_router.dart';
 import 'package:band_names/config/theme/app_theme.dart';
+import 'package:band_names/providers/global-states.dart';
 import 'package:band_names/providers/web_socket_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -14,6 +15,7 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => WebSocketService()),
+        ChangeNotifierProvider(create: (context) => GlobalStates()),
       ],
       child: MaterialApp.router(
         debugShowCheckedModeBanner: false,

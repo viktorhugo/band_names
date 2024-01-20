@@ -1,20 +1,23 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:band_names/models/band_model.dart';
 import 'package:flutter/material.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 
 enum WebSocketServerStatus  {
-  Online,
-  Offline,
-  Connecting,
-  Reconnecting
+  online,
+  offline,
+  connecting,
+  reconnecting
 }
 
 class WebSocketService with ChangeNotifier {
 
-  WebSocketServerStatus _webSocketServerStatus = WebSocketServerStatus.Connecting;
+  WebSocketServerStatus _webSocketServerStatus = WebSocketServerStatus.connecting;
+
+  List<Band> bands = [];
 
   late WebSocketChannel channel;
 
@@ -26,7 +29,7 @@ class WebSocketService with ChangeNotifier {
   }
 
   void _startConnection() async {
-    print('_initConfig');
+    print('_startConnection WSS');
     // in test Ipconfig IP
     final wsUrl = Uri.parse('ws://192.168.1.5:8082');
     channel = WebSocketChannel.connect(wsUrl);
@@ -34,7 +37,7 @@ class WebSocketService with ChangeNotifier {
     try {
       await channel.ready;
       print('Web Socket Server Connected to $wsUrl');
-      _webSocketServerStatus = WebSocketServerStatus.Online;
+      _webSocketServerStatus = WebSocketServerStatus.online;
       notifyListeners();
     } on SocketException catch (e) {
       // Handle the exception.
@@ -48,8 +51,24 @@ class WebSocketService with ChangeNotifier {
     }
 
     channel.stream.listen((message) {
-        print( jsonDecode(message) );
+        final Map<String, dynamic > messageDecode = jsonDecode(message);
+        print(messageDecode['event']);
+        if (messageDecode['event'] == 'get-all-bands') {
+          bands = (messageDecode['data'] as List)
+            .map((band) => Band.fromMap(band))
+            .toList();
+          print(bands);
+          notifyListeners();
+        }
+        if (messageDecode['event'] == 'add-vote-band') {
 
+        }
+        if (messageDecode['event'] == 'create-band') {
+
+        }
+        if (messageDecode['event'] == 'Delete-band') {
+
+        }
         // channel.sink.add('received!');
         // channel.sink.close(status.goingAway);
         
@@ -59,7 +78,7 @@ class WebSocketService with ChangeNotifier {
       },
       onDone: (() {
         print('Error Web Socket Server DisConnected to $wsUrl');
-        _webSocketServerStatus = WebSocketServerStatus.Offline;
+        _webSocketServerStatus = WebSocketServerStatus.offline;
         notifyListeners();
         _handleLostConnection();
       })
@@ -72,7 +91,7 @@ class WebSocketService with ChangeNotifier {
     channel.sink.add(
       jsonEncode(
         {
-          "event": "create-band", 
+          "event": event, 
           "data": data
         },
       ),
@@ -80,7 +99,7 @@ class WebSocketService with ChangeNotifier {
   }
 
   void _handleLostConnection() {
-    _webSocketServerStatus = WebSocketServerStatus.Reconnecting;
+    _webSocketServerStatus = WebSocketServerStatus.reconnecting;
     notifyListeners();
     Future.delayed(const Duration(seconds: 3), () {
       _startConnection();
